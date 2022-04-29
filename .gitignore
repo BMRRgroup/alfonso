@@ -1,0 +1,12 @@
+.ipynb_checkpoints
+examples/temp
+/code-coverage/
+/test-results/
+# m2docgen
+/info.xml
+lib/m2docgen/info.xml
+lib/m2docgen/m2docgen_documentation
+/tests/code-coverage/
+/tests/results/
+/tests/temp/
+/doc/

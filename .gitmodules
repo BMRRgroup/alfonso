@@ -1,0 +1,18 @@
+[submodule "lib/jsonlab"]
+	path = lib/jsonlab
+	url = https://github.com/fangq/jsonlab.git
+[submodule "lib/matlab2tikz"]
+	path = lib/matlab2tikz
+	url = https://github.com/matlab2tikz/matlab2tikz.git
+[submodule "lib/chebfun"]
+	path = lib/chebfun
+	url = https://github.com/chebfun/chebfun.git
+[submodule "lib/matlab-helper"]
+	path = lib/matlab-helper
+	url = https://github.com/stfnr/matlab-helper.git
+[submodule "lib/OPTI"]
+	path = lib/OPTI
+	url = https://github.com/jonathancurrie/OPTI.git
+[submodule "lib/mexNL2SOL"]
+	path = lib/mexNL2SOL
+	url = https://github.com/stfnnfts/mexNL2SOL.git
