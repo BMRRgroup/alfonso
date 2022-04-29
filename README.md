@@ -102,7 +102,7 @@ For available versions see the [tags on this repository](https://github.com/bmrr
 
 ## Acknowledgments
 
-* Carl Ganger kindly provided his least_squares_varpro_gss_cg implementation.
+* Carl Ganter kindly provided his least_squares_varpro_gss_cg implementation.
 
 ## References
 
