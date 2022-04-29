@@ -2,7 +2,7 @@
 
 # ALFONSO - A versatiLe Formulation fOr N-dimensional Signal model fitting of MR spectroscopy data 
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) | [![codecov](https://codecov.io/gh/BMRRgroup/alfonso/branch/main/graph/badge.svg?token=9GZUOO0B1K)](https://codecov.io/gh/BMRRgroup/alfonso)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![codecov](https://codecov.io/gh/BMRRgroup/alfonso/branch/main/graph/badge.svg?token=9GZUOO0B1K)](https://codecov.io/gh/BMRRgroup/alfonso)
 
 ALFONSO is a simple class for processing and quantification of single-voxel magnetic resonance spectroscopy (MRS) measurements. 
 
