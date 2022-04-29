@@ -13,9 +13,10 @@ jobs:
       MATLAB: ${{ matrix.matlab }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
         with: 
           submodules: recursive
+          lfs: true
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
         with:
