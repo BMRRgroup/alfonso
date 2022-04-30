@@ -37,6 +37,12 @@ cd alfonso
 git submodule update --init --recursive
 ```
 
+Test and example data can also be download from an alternative source (in case github's LFS quote is exceed): 
+
+```
+curl -o gitlfs.zip https://syncandshare.lrz.de/dl/fiFCroP6zFrn64MKkiWXkDpD/20220430_tests.zip
+unzip tests.zip
+```
 ### Quick start example
 
 The following quick example adds ALFONSO to the MATLAB path and performs simple data processing followed by an exemplary quantification.
