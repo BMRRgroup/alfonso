@@ -41,7 +41,7 @@ Test and example data can also be download from an alternative source (in case g
 
 ```
 curl -o gitlfs.zip https://syncandshare.lrz.de/dl/fiFCroP6zFrn64MKkiWXkDpD/20220430_tests.zip
-unzip tests.zip
+unzip gitlfs.zip
 ```
 ### Quick start example
 
