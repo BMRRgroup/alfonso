@@ -23,7 +23,7 @@ jobs:
           submodules: recursive
           #lfs: true 
       - name: download git-lfs data # avoid git-lfs traffic
-        uses: schmiddim/action-wget-unzip@v2
+        uses: stfnr/action-wget-unzip@v2.1
         with:
           url: 'https://syncandshare.lrz.de/dl/fiFCroP6zFrn64MKkiWXkDpD/20220430_tests.zip'
           destination: .
