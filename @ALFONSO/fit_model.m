@@ -121,6 +121,13 @@ if (ndims(opsqueeze(modelfunc(x_init))) ~= ndims(optim_data)) ...
         || sum(size(opsqueeze(modelfunc(x_init))) ~= size(optim_data))
     error(['Model dimensionality (' num2str(size(opsqueeze(modelfunc(x_init)))) ') not in agreement with data dimensionality (' num2str(size(optim_data)) ')!'])
 end
+if ~ isreal(x_init)
+    warning('ALFONSO.fit_model: initial value is not real-valued!')
+end
+if ~ isreal(costfunc(x_init))
+    warning('ALFONSO.fit_model: costfunc(x_init) returns non-real values!')
+end
+
 
 % % debug
 if this.reconparam.quant.fit_model.debug
