@@ -24,6 +24,7 @@ Currently the following file formats are supported for data import.
 
 - Philips .data / .list 
 - Philips .raw / .lab (available upon qualifying request, requires MRecon ([Gyrotools](http://www.gyrotools.com/gt/index.php/products/reconframe))
+- Philips .sdat / .spar (requires to provide additional meta information via .ini file) - early experimental version 
 - GE .7
 - Your custom data format - the implementation of custom data readers is trivial and outlined in the `Quickstart.mlx`. 
 
@@ -109,6 +110,7 @@ For available versions see the [tags on this repository](https://github.com/bmrr
 ## Acknowledgments
 
 * Carl Ganter kindly provided his least_squares_varpro_gss_cg implementation.
+* Some of the MRS data readers were taken from the [FID-A](https://github.com/CIC-methods/FID-A) project driven by Jamie Near (McGill University) et al. 
 
 ## References
 

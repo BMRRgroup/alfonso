@@ -22,7 +22,7 @@ classdef ALFONSO < matlab.mixin.Copyable & dynamicprops
         
         function this = ALFONSO( filename )
             
-            this.version = '0.1.0';
+            this.version = '0.1.1';
             
             this.gitinfo = get_gitinfo(mfilename('fullpath'));
 

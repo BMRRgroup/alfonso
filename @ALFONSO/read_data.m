@@ -12,6 +12,8 @@ function read_data( this )
 %           - *.raw/*.lab (Gyrotools MRecon Version) using MRecon
 %           - *.data/*.list/*.ini - data/list files plus an additional
 %           configuration file
+%            - *.sdat/*.spar/*.ini - sdat/spar files plus an additional
+%           configuration file
 %       - GE
 %           - *.7 raw data.
 %
@@ -33,6 +35,8 @@ function read_data( this )
 %                   Philips raw data
 %               0.5 (Apr 21, 2022)
 %                   Add init_scanparam method.
+%               0.6 (Apr 30, 2023)
+%                   Added sdat/spar support
 %
 % Authors:
 %
@@ -175,7 +179,79 @@ else
             
         case {'.sdat', '.spar'} % Philips SDAT / SPAR data
             
-            error(['Raw data file type (' file_ext ') not yet supported! (' this.scanparam.filename ')'])
+            data = io_loadspec_sdat([this.scanparam.filepathname this.scanparam.filename], 1);
+                
+            % set param
+            this.init_scanparam()
+            this.scanparam.scan_name = this.scanparam.filename;
+            
+            this.scanparam.n_dyn = data.sz(2);
+            this.scanparam.n_mix = 1;
+            this.scanparam.n_coil = 1; % sdat is already coilcombined
+            this.scanparam.n_echo = 1;
+            this.scanparam.n_loc = 1;
+            this.scanparam.n_aver = 1; % data.sz(data.dims.averages);
+            this.scanparam.n_sample = data.sz(data.dims.t);
+            
+            this.scanparam.voxel_size_mm = [];
+            this.scanparam.fieldstrength_T = data.Bo;
+            this.scanparam.bandwidth_Hz = data.spectralwidth;
+            
+            this.scanparam.gamma_bar = data.txfrq / this.scanparam.fieldstrength_T; % Hz / Tesla
+            
+            
+            this.scanparam.TE_s = data.te .* 1e-3;
+            
+            this.scanparam.TM_s = [];
+            
+            this.scanparam.bvalue_spm2 = [];
+            
+            this.scanparam.TR_s = data.tr .* 1e-3;
+            
+            this.scanparam.TI_s = [];
+            
+            this.scanparam.acq_n = [];
+            
+            this.scanparam.dynSeries = 'TE'; % TODO this is fixed now
+            
+            this.scanparam.acq_window_center_ppm = data.ppm(end/2);
+            
+            this.scanparam.freqsign = -1; % PHILIPS -> -1 => counter-clockwise
+            
+            this.scanparam.patient_id = this.scanparam.filename;
+            this.scanparam.series_time = [];
+            this.scanparam.series_number = [];
+            this.scanparam.diffusion_gradient_mode = [];
+            
+            % read in ini file which holds addtional required information
+            inifile = IniConfig;
+            if ~inifile.ReadFile( [file_pathstring filesep file_name '.ini'])
+                error('Could not find .ini file which is required to read in .data/.list. The .ini file has to be created manually and holds the missing meta information. Please see /DataReader/PHILIPS/data-list-example.ini for an example.')
+            end
+            
+            initfile_section = 'ScanParam';
+            
+            init_keys = inifile.GetKeys(initfile_section);
+            for ikey = 1:length( init_keys )
+                this.scanparam.(init_keys{ikey}) = inifile.GetValues(initfile_section, init_keys{ikey});
+            end
+            
+            if isfield(this.scanparam,'bvalue')
+                % convert from s / mm^2 to s / m^2
+                this.scanparam.bvalue_spm2 = this.scanparam.bvalue .* 1e6;
+                this.scanparam = rmfield(this.scanparam, 'bvalue');
+            end
+            
+            % this needs to be adjusted for higher dimensional data
+            data_dimensions = {'x', this.scanparam.dynSeries };
+            
+            % set data
+            this.set_data( data.fids, data_dimensions )
+            
+            % set phase
+            this.flags.phase_corrected = 1;
+            
+            clear data data_dimensions
             
         case {'.rda'} % Siemens raw data
             
