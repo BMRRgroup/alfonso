@@ -43,12 +43,13 @@ function set_data( this, data, dim )
 
 if nargin < 3 % same as all
     
-    error('Functions requires data and dim as input arguments!')
+    error('ALFONSO:set_data:MissingInput', ...
+        'Both data and dim arguments are required. Usage: set_data(data, dim)')
     
 elseif nargin == 3
     
     if ~isempty(this.quant)
-        warning('There are already quantifications available that are linked to the data that gets now overwritten.')
+        warning('ALFONSO:set_data:Overwrite', 'There are already quantifications available that are linked to the data that gets now overwritten.')
     end
     
     if ischar( dim )
@@ -56,7 +57,8 @@ elseif nargin == 3
     end
     
     if ~iscell( dim )
-        error('dim needs to be a cell array of strings')
+        error('ALFONSO:set_data:InvalidDimType', ...
+            'dim must be a cell array of character vectors. Got: %s', class(dim))
     end
     
     % check if this.dims & this.data are empty 

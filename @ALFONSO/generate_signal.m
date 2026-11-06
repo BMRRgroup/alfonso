@@ -1,4 +1,4 @@
-function [data, dims] = generate_signal( this, x_in )
+function [data, dims] = generate_signal( this, x_in, c )
 %GENERATE_SIGNAL calculates the signal function using model parameters x_in
 %   [data, dims] = generate_signal( x_in ) generates the signal according 
 %   to the model function for the current quantification model 
@@ -52,6 +52,11 @@ function [data, dims] = generate_signal( this, x_in )
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% handle constant parameters
+if nargin < 3
+    c = [];
+end
+
 modelparam = this.quant{this.cur_quant}.model.param;
 
 if ~exist('x_in','var')
@@ -68,7 +73,14 @@ modelfunc = this.get_model_func();
 opsqueeze = @(a) (shiftdim(sum(a,1),1));
 
 % generate signal
-data = opsqueeze( modelfunc(x_in) );
+if nargin(modelfunc) == 1
+    data = opsqueeze( modelfunc(x_in) );
+elseif nargin(modelfunc) == 2
+    data = opsqueeze( modelfunc(x_in, c) );
+else
+    error('ALFONSO:generate_signal:InvalidNargin', ...
+        'Modelfunction requires an unknown number of input parameters.')
+end
 
 % obtain dimensions
 % TODO: additional dimensions as added by the model are not handled yet

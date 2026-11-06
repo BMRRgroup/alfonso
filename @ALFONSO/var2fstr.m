@@ -44,7 +44,8 @@ switch class(v)
     case 'double'
         str = strjoin(arrayfun(@(x) sprintf( FORMAT, x ), v, 'UniformOutput', false), DELIMITER);
     otherwise
-        error(['Cannot handle variable of type ' class(v) '.'])
+        error('ALFONSO:var2fstr:UnsupportedType', ...
+            'Cannot handle variable of type %s.', class(v))
 end
 
 end

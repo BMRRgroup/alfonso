@@ -33,7 +33,8 @@ function fit_param2freq( this, dim )
 
 
 if ~exist('dim','var') && length(this.dims) > 2
-    error([mfilename ': can only handle 2 dims! Pass dim as argument!'])
+    error('ALFONSO:fit_param2freq:TooManyDims', ...
+        'Data has more than 2 dimensions. Pass the target dimension as second argument: fit_param2freq(dim)')
 elseif ~exist('dim','var')
     dim = 2;
 end

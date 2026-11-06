@@ -95,9 +95,12 @@ propfh = str2func(['@(x) ' type '(x)']);
 
 switch n_dyn
     case 0
-        error([mfilename ': cannot find any known dimensions. I am currently aware of the follwing ones: ' ALFONSO.var2fstr( known_dynamics ) ])
+        error('ALFONSO:plot_dynSeries:NoKnownDims', ...
+            'Cannot find any known dimensions. Currently supported: %s', ...
+            ALFONSO.var2fstr(known_dynamics))
     case 1
-        error('Plotting for single dimension data not implemented!')
+        error('ALFONSO:plot_dynSeries:SingleDimNotImplemented', ...
+            'Plotting for single dimension data is not implemented.')
     case 2
         
         n_dyn1 = size(spec, 2);
@@ -172,9 +175,11 @@ switch n_dyn
         end
         
     case 4
-        error('Not implemented!')
+        error('ALFONSO:plot_dynSeries:NotImplemented', ...
+            'Plotting for 4 dimensions is not implemented.')
     otherwise
-        error('Not implemented!')
+        error('ALFONSO:plot_dynSeries:NotImplemented', ...
+            'Plotting for this dimensionality is not implemented.')
 end
 
     function set_axes()

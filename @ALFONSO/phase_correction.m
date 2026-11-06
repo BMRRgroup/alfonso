@@ -56,7 +56,8 @@ function [ fid_corr ] = phase_correction( this, FID )
 DEBUG = this.reconparam.phase_correction.debug;
 
 if this.flags.phase_corrected
-    warning('Phase correction was already performed!')
+    warning('ALFONSO:phase_correction:AlreadyApplied', ...
+        'Phase correction was already performed. Reset flag to reapply.')
 end
 
 if (this.reconparam.phase_correction.enable && ~this.flags.phase_corrected) || nargin > 1
@@ -141,7 +142,8 @@ if (this.reconparam.phase_correction.enable && ~this.flags.phase_corrected) || n
     end
     
 else
-    warning('Skipped ALFONSO.phase_correction.')
+    warning('ALFONSO:phase_correction:Skipped', ...
+        'Phase correction was skipped because it is already applied or disabled.')
 end
 
 end

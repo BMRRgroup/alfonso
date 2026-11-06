@@ -9,6 +9,8 @@ function init_scanparam( this )
 %
 % Revisions: 	0.1 (Apr 21, 2022)
 %                   Initial version.
+%               0.1.1 (Jun 6, 2024)
+%                   Fixed field initialization
 %
 % Authors:
 %
@@ -51,7 +53,7 @@ fields_empty = { ...
     'metcycle'
     };
 
-for iField = length(fields_empty)
+for iField = 1:length(fields_empty)
     this.scanparam.(fields_empty{iField}) = [];
 end
 

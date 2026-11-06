@@ -60,17 +60,21 @@ switch this.reconparam.coilcombination.coil_selection_mode
         sel_coils = autoCoilSelection(fid);
         
     otherwise
-        error('reconparam.coilcombinatino.coil_selection_mode was not set!')
+        error('ALFONSO:select_coils:ModeNotSet', ...
+            'reconparam.coilcombination.coil_selection_mode was not set.')
 end
 
 if length(sel_coils) < 0.5 *size(fid,2)
-    warning('Less than 50% of all coil elements are considered!')
+    warning('ALFONSO:select_coils:FewCoils', ...
+        'Less than 50%% of coil elements selected (%d/%d). Consider adjusting the selection threshold.', ...
+        length(sel_coils), size(fid,2))
 end
 
 if isempty( sel_coils )
     
     sel_coils = 1:size(fid,2);
-    warning('No coils have been selected. Using all coil elements!')
+    warning('ALFONSO:select_coils:NoCoilsSelected', ...
+        'No coils passed the selection criteria. Falling back to all coil elements.')
     
 end
 
@@ -102,7 +106,9 @@ disp(['Coils used: ' num2str(sel_coils) ' ( ' num2str(length(sel_coils)) ' / ' n
         [~, ILAG] = max(C);
         shiftmatrix = reshape( LAGS(ILAG), [nCoils, nCoils] );
         if sumn( shiftmatrix ) > 0
-            warning(['AUTO COIL SELECTION: coil shift detected. Affected coil: ' num2str(find(shiftmatrix(1,:) > 0))])
+            warning('ALFONSO:select_coils:CoilShift', ...
+                'Coil shift detected. Affected coil: %s', ...
+                num2str(find(shiftmatrix(1,:) > 0)))
         end
         
         selectedCoils = find( real(mc) > trsh);

@@ -84,12 +84,14 @@ end
         case 'lorentzian'
             filter = exp(-d*time);
         otherwise
-            error('Unkown filter type! Known filter_types: cut-off, gaussian, lorentzian.');
+            error('ALFONSO:apodize:UnknownFilter', ...
+                'Unknown filter type "%s". Supported types: cut-off, gaussian, lorentzian.', param.filter);
     end
 
 % apply filter
 if isempty( filter )
-    warning('Apodization not possible: apodize was not able to obtain a filter function!')
+    warning('ALFONSO:apodize:NoFilter', ...
+        'Apodization not possible: apodize was not able to obtain a filter function!')
 else
     FID = FID .* filter(:);
 end

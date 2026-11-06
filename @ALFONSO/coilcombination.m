@@ -51,7 +51,8 @@ if this.reconparam.coilcombination.enable && ~this.flags.coilcombination
     this.flags.coilcombination = 1;
     
 else
-    warning('Skipped ALFONSO.coilcombination.')
+    warning('ALFONSO:coilcombination:Skipped', ...
+        'Coil combination was skipped because it is already applied or disabled.')
 end
 
 end

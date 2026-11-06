@@ -29,7 +29,7 @@ function save_plots(filepath, FORMAT)
 % Created:	Nov 3, 2018
 %
 % Revisions:    0.1 (Nov 3, 2018)
-%					Initial prototype version.
+%					          Initial prototype version.
 %               0.1.1 (Mar 09, 2020)
 %                   Added support for using Matlab's print method to pass
 %                   additional arguments.
@@ -37,6 +37,8 @@ function save_plots(filepath, FORMAT)
 %                   color backgrounds.
 %               0.1.2 (May 13, 2020)
 %                   Added filename sanitization.
+%               0.1.3 (Oct 08, 2022)
+%                   Set matlab2tikz export flag for externalDate to true
 %
 % Authors:
 %
@@ -134,6 +136,7 @@ for iFig = minFigNumber:maxFigNumber
         if strcmpi(filename_ext(end-3:end), '.tex')
             matlab2tikz(fullfile(filepath, filename_ext), ...
                 'standalone', true, ...
+                'externalData', true, ...
                 'showInfo', false, ...
                 'strict', true)
             fprintf('matlab2tikz: saved %s\n', filename_ext)

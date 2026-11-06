@@ -21,6 +21,8 @@ function set_model( this, model_name, quant_idx )
 %               0.2.1 (May 08, 2020)
 %                   Added capability to load model directly from json file,
 %                   if the passed MODEL_NAME ends with .json
+%               0.2.2 (Jun 04, 2026)
+%                   Robustness fix for moving quant struct into cell.
 %
 % Authors:
 %
@@ -57,7 +59,7 @@ else % set specific quantification
     this.cur_quant = quant_idx;
     
     if ~isempty(this.quant) && isstruct(this.quant)
-        this.quant{1} = this.quant;
+        this.quant = {this.quant};
     end
     
     load_JSON_model(this.cur_quant, model_name);
@@ -82,7 +84,9 @@ end
         % file, otherwise inform the user
         [ ~, passed_modelname ] = fileparts(model_name);
         if ~strcmp(this.quant{quant_idx}.model.name,passed_modelname)
-            warning(['Name of requested model (' passed_modelname ') deviates from the model name given in it''s definition file (' this.quant{quant_idx}.model.name ').'])
+            warning('ALFONSO:set_model:NameMismatch', ...
+                'Name of requested model ("%s") deviates from the model name in its definition file ("%s").', ...
+                passed_modelname, this.quant{quant_idx}.model.name)
         end
         
     end

@@ -56,14 +56,34 @@ function set_ref_freq( this, varargin )
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if length( varargin ) == 1 % simple mode which sets ppm based on largest peak
+nArgs = length(varargin);
+
+if nArgs == 0
+    error('ALFONSO:set_ref_freq:InvalidArgCount', ...
+        '%s: Requires 1 or 2 arguments.\nUsage: set_ref_freq(ppm) or set_ref_freq(mode, ppm)', ...
+        mfilename);
+elseif nArgs == 1
     mode_pars = varargin{1};
     mode = this.reconparam.set_ref_freq.defaults.mode;
-elseif length( varargin ) > 1 % autoset modes
+elseif nArgs == 2
     mode = varargin{1};
     mode_pars = varargin{2};
 else
-    error('ALFONSO.set_ref_freq requires 1 or 2 arguments!')
+    error('ALFONSO:set_ref_freq:TooManyArgs', ...
+        '%s: Too many arguments (%d provided). Expected 1 or 2 arguments.\nUsage: set_ref_freq(ppm) or set_ref_freq(mode, ppm)', ...
+        mfilename, nArgs);
+end
+
+if nArgs >= 2 && ~ischar(mode) && ~isstring(mode)
+    error('ALFONSO:set_ref_freq:InvalidModeType', ...
+        '%s: Mode must be a string. Valid modes: ''simple'', ''autoset-waterfat''', ...
+        mfilename);
+end
+
+if ~isnumeric(mode_pars) || ~isscalar(mode_pars)
+    error('ALFONSO:set_ref_freq:InvalidPpmValue', ...
+        '%s: ppm value must be a numeric scalar. Received: %s', ...
+        mfilename, class(mode_pars));
 end
 
 this.get_ppm_scale();
@@ -115,6 +135,9 @@ switch mode
         ppm_offset = ppm - reference_peak_ppm;
         
     otherwise
+        error('ALFONSO:set_ref_freq:UnknownMode', ...
+            '%s: Unknown mode ''%s''. Valid modes: ''simple'', ''autoset-waterfat''', ...
+            mfilename, mode);
 end
 
 this.scanparam.acq_window_center_ppm = ppm_offset;

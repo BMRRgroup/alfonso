@@ -89,7 +89,9 @@ if nargin < 3
 end
 
 if length(peaks_ppm) ~= length(peak_names)
-    error('set_peaks: SIZ(peaks_ppm) ~= SIZ(peak_names)!')
+    error('ALFONSO:set_peaks:SizeMismatch', ...
+        'peaks_ppm (%d elements) and peak_names (%d elements) must have the same length.', ...
+        length(peaks_ppm), length(peak_names))
 end
 
 this.quant{this.cur_quant}.peaks.ppm = peaks_ppm;

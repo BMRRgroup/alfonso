@@ -56,6 +56,27 @@ if check_requirements()
     end
     
     if this.reconparam.polaritycombination.debug
+        
+        figure;
+        for i = 1:size(fid, 3)
+            subplot(ceil(sqrt(size(fid, 3))),ceil(sqrt(size(fid, 3))),i)
+        	hold all; 
+            plot(squeeze(real(this.ifft( fid(:,1:2,i))))); plot(squeeze(real(this.ifft( mean(fid(:,1:2,i),2)))));
+        end
+%         for i = 1:size(fid, 3)
+%             figure; 
+%             subplot(2,2,1)
+%             plot(angle(fid(1:10,:,i)))
+%             subplot(2,2,2)
+%             plot(angle(fid(1:10,1,i)-fid(1:10,2,i)))
+%             subplot(2,2,3)
+%             plot(abs(angle(fid(1:10,1,i))-angle(fid(1:10,2,i))))
+%             subplot(2,2,4)
+%             hold all
+%             plot(squeeze(real(this.ifft( fid(:,1:2,i)))),'k')
+%             plot(squeeze(real(this.ifft( mean(fid(:,1:2,i),2)))),'r')
+%         end
+        
         figure;
         subplot(2,2,1)
         plot(squeeze(abs(this.ifft( fid(:,1,:)))))
@@ -87,15 +108,18 @@ end
     function ok = check_requirements()
         ok = true;
         if ~ this.is_data_dim('diffusion_orientation')
-            warning('No polarity dimension found.');
+            warning('ALFONSO:polaritycombination:NoPolarityDim', ...
+                'No diffusion_orientation dimension found. Ensure data was acquired with polarity switching.');
             ok = false;
         end
         if ~ this.reconparam.polaritycombination.enable
-            warning('Skipping POLARITYCOMBINTION - (disabled).');
+            warning('ALFONSO:polaritycombination:Disabled', ...
+                'Polarity combination is disabled. Set reconparam.polaritycombination.enable = 1 to enable.');
             ok = false;
         end
-        if ~ this.flags.polaritycombination
-            warning('Skipping POLARITYCOMBINTION - already performed.');
+        if this.flags.polaritycombination
+            warning('ALFONSO:polaritycombination:AlreadyApplied', ...
+                'Polarity combination was already performed. Reset flags to reapply.');
             ok = false;
         end
     end

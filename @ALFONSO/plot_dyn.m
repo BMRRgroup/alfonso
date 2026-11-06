@@ -34,7 +34,7 @@ function fh = plot_dyn( this, dyn, type )
 
 
 
-known_dynamics = {'x', 'TI', 'TE', 'TM', 'TR', 'bvalue'};
+known_dynamics = {'x', 'TI', 'TE', 'TM', 'TR', 'bvalue', 'loc', 'dynamic'};
 
 found_dyn = known_dynamics(ismember(known_dynamics, this.dims));
 
@@ -43,7 +43,8 @@ disp(['Found the following dyanmics: ' ALFONSO.var2fstr( found_dyn, '%s', ', ')]
 n_dyn = length(found_dyn);
 
 if (n_dyn - 1) ~= length(dyn)
-    error(['Argument dyn has to be a vector with the length of the number of dynamics dimensions (n=' num2str(n_dyn-1) ')'])
+    error('ALFONSO:plot_dyn:InvalidDynArg', ...
+        'dyn must be a vector of length %d (number of dynamic dimensions minus 1).', n_dyn-1)
 end
 
 if nargin < 3
@@ -64,9 +65,12 @@ x_plot_rang = x_plot_rang_idx(1):x_plot_rang_idx(2);
 
 switch n_dyn
     case 0
-        error([mfilename ': cannot find any known dimensions. I am currently aware of the follwing ones: ' ALFONSO.var2fstr( known_dynamics ) ])
+        error('ALFONSO:plot_dyn:NoKnownDims', ...
+            'Cannot find any known dimensions. Currently supported: %s', ...
+            ALFONSO.var2fstr(known_dynamics))
     case 1
-        error('Not implemented!')
+        error('ALFONSO:plot_dyn:SingleDimNotImplemented', ...
+            'Plotting for single dimension data is not implemented.')
     case 2
         
         spec = this.ifft( this.get_data(found_dyn) );
@@ -135,6 +139,7 @@ switch n_dyn
         legend(legend_txt)
         
     otherwise
-        error('Not implemented!')
+        error('ALFONSO:plot_dyn:NotImplemented', ...
+            'Plotting for this dimensionality is not implemented.')
 end
 end

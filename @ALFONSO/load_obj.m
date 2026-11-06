@@ -39,7 +39,8 @@ function [ ALFONSOobj ] = load_obj( this, filename )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if nargin < 2
-    error('Please provide .mat file to load ALFONSO obj from!')
+    error('ALFONSO:load_obj:MissingFilename', ...
+        'A .mat filename is required. Usage: load_obj(filename)')
 end
 
 load(filename, 'ALFONSOobj');
@@ -71,7 +72,8 @@ this = recurive_merge(this, ALFONSOobj, fieldnames(ALFONSOobj));
                 try
                     thisobj.(fields{iField}) = obj.(fields{iField});
                 catch
-                    warning([fields{iField} ' could not be loaded from ' filename])
+                    warning('ALFONSO:load_obj:FieldLoadFailed', ...
+                        'Field "%s" could not be loaded from %s.', fields{iField}, filename)
                 end
             end
         end

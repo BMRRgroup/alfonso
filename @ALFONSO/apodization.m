@@ -64,7 +64,8 @@ if this.reconparam.apodization.enable && ~this.flags.apodization
     this.flags.apodization = 1;
 
 else
-    warning('Skipped ALFONSO.apodization.')
+    warning('ALFONSO:apodization:Skipped', ...
+        'Apodization was skipped because it is already applied or disabled.')
 end
 
 end

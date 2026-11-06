@@ -29,7 +29,7 @@ function [param_unit, param_factor] = get_dim_display_info( this, scanparam )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if ~iscell( scanparam )
-    scanparam = {scanparam};
+    scanparam = { scanparam };
 end
 
 known_source_units = {'_s','_spm2'};

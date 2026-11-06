@@ -12,7 +12,9 @@ function get_ppm_scale( this )
 % Created:	Oct 15, 2018
 %
 % Revisions: 	1.0 (Oct 15, 2018)
-%				Initial version.
+%                   Initial version.
+%               1.1 (Oct 08, 2022)
+%                   Fixed logic for multi loc data
 %
 % Authors: 
 %
@@ -30,7 +32,7 @@ function get_ppm_scale( this )
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nReadoutPoints = size(this.data,1);
+nReadoutPoints = size( this.get_data('x'), 1 );
 
 this.scanparam.freq_abs = ((0:nReadoutPoints-1) - (0.5 * nReadoutPoints)) * this.scanparam.bandwidth_Hz ./ nReadoutPoints;
 this.scanparam.freq_rel = this.scanparam.freq_abs + this.scanparam.acq_window_center_ppm * this.scanparam.fieldstrength_T * this.scanparam.gamma_bar * 1e-6;

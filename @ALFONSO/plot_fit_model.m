@@ -129,7 +129,9 @@ propfh = str2func(['@(x) ' type '(x)']);
 
 switch n_dyn1
     case 0
-        error([mfilename ': cannot find any known dimension. I am currently aware of the follwing ones: ' ALFONSO.var2fstr( known_dynamics ) ])
+        error('ALFONSO:plot_fit_model:NoKnownDims', ...
+            'Cannot find any known dimensions. Currently supported: %s', ...
+            ALFONSO.var2fstr(known_dynamics))
     case 1
         
         fh = figure;
@@ -220,7 +222,8 @@ switch n_dyn1
                     
                 end
             else
-                warning(['Single dynamic plot suppressed as this would result in too many plots. (n=' num2str(n_dyn1) ')'])
+                warning('ALFONSO:plot_fit_model:PlotsSuppressed', ...
+                    'Single dynamic plot suppressed as this would result in too many plots (n=%d).', n_dyn1)
             end
         end
         
@@ -347,9 +350,11 @@ switch n_dyn1
         end
         
     case 4
-        error('4 dimensions cannot be handled yet! Feel free to implement!')
+        error('ALFONSO:plot_fit_model:FourDimsNotImplemented', ...
+            '4 dimensions cannot be handled yet. Feel free to implement!')
     otherwise
-        error('Not implemented!')
+        error('ALFONSO:plot_fit_model:NotImplemented', ...
+            'Plotting for this dimensionality is not implemented.')
 end
 
 
@@ -416,10 +421,12 @@ end
 
     function check_requirements()
         if isempty( this.quant )
-            error(['No quantification found. Run fit_model first...'])
+            error('ALFONSO:plot_fit_model:NoQuantification', ...
+                'No quantification found. Run fit_model first.')
         end
         if ~isfield( this.quant{this.cur_quant}, 'output')
-            error(['No output found for quantification #' num2str(this.cur_qunat) '. Consider running fit_model first...'])
+            error('ALFONSO:plot_fit_model:NoOutput', ...
+                'No output found for quantification #%d. Run fit_model first.', this.cur_quant)
         end
     end
 

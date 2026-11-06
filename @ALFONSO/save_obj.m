@@ -52,7 +52,7 @@ else
 end
 
 % append .mat to filename if needed
-if ~ strcmpi(fname(end-3:end), '.mat')
+if ~ endsWith(fname, '.mat')
     fname = [fname '.mat'];
 end
 

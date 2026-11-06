@@ -35,7 +35,9 @@ function read_data( this )
 %                   Philips raw data
 %               0.5 (Apr 21, 2022)
 %                   Add init_scanparam method.
-%               0.6 (Apr 30, 2023)
+%               0.6 (Dec 7, 2022)
+%                   Added support for ImDataParams files.
+%               0.7 (Apr 30, 2023)
 %                   Added sdat/spar support
 %
 % Authors:
@@ -55,13 +57,14 @@ function read_data( this )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if this.reconparam.read_data.enable_cache && ~isempty(this.reconparam.read_data.cache)
-    
-    warning( [mfilename ': cache data found! Reset data to cached data!'])
-    
+
+    warning('ALFONSO:read_data:CachedDataFound', ...
+        'Cached data found. Loading cached data instead of reading from file.')
+
     get_cache();
-    
+
 else
-    
+
     if isempty(this.scanparam.filename)
         % provide simple file picker if filename was not provided
         [file_name, file_pathstring] = ...
@@ -70,16 +73,16 @@ else
             'MultiSelect', 'off');
         this.set_file([file_pathstring file_name]);
     end
-    
+
     [file_pathstring, file_name, file_ext] = fileparts( [this.scanparam.filepathname this.scanparam.filename] );
-    
+
     switch lower( file_ext )
-        
+
 %         case {'.example'} % .example file extension
 %             % this is an example of how a custom data reader could be
 %             % implemented
 %             [ data, meta ] = read_custom_data( [this.scanparam.filepathname this.scanparam.filename] );
-%             
+%
 %             % init scanparam
 %             this.init_scanparam()
 %             
@@ -89,7 +92,6 @@ else
 %             %  this.scanparam.TE_s = meta.TE_ms .* 1e-3; % always convert to SI units, e.g. from ms -> s
 %             this.scanparam.patient_id = [];
 %             this.scanparam.scan_name = [];
-%             this.scanparam.patient_id = [];
 %             this.scanparam.dynSeries = [];
 %             this.scanparam.dynSeries2 = [];
 %             this.scanparam.dynSeries3 = [];
@@ -151,7 +153,8 @@ else
             % read in ini file which holds addtional required information
             inifile = IniConfig;
             if ~inifile.ReadFile( [file_pathstring filesep file_name '.ini'])
-                error('Could not find .ini file which is required to read in .data/.list. The .ini file has to be created manually and holds the missing meta information. Please see /DataReader/PHILIPS/data-list-example.ini for an example.')
+                error('ALFONSO:read_data:IniFileNotFound', ...
+                    'Could not find .ini file which is required to read in .data/.list. The .ini file has to be created manually and holds the missing meta information. Please see /DataReader/PHILIPS/data-list-example.ini for an example.')
             end
             
             initfile_section = 'ScanParam';
@@ -180,7 +183,7 @@ else
         case {'.sdat', '.spar'} % Philips SDAT / SPAR data
             
             data = io_loadspec_sdat([this.scanparam.filepathname this.scanparam.filename], 1);
-                
+            
             % set param
             this.init_scanparam()
             this.scanparam.scan_name = this.scanparam.filename;
@@ -217,45 +220,27 @@ else
             this.scanparam.acq_window_center_ppm = data.ppm(end/2);
             
             this.scanparam.freqsign = -1; % PHILIPS -> -1 => counter-clockwise
-            
-            this.scanparam.patient_id = this.scanparam.filename;
-            this.scanparam.series_time = [];
-            this.scanparam.series_number = [];
-            this.scanparam.diffusion_gradient_mode = [];
-            
-            % read in ini file which holds addtional required information
-            inifile = IniConfig;
-            if ~inifile.ReadFile( [file_pathstring filesep file_name '.ini'])
-                error('Could not find .ini file which is required to read in .data/.list. The .ini file has to be created manually and holds the missing meta information. Please see /DataReader/PHILIPS/data-list-example.ini for an example.')
-            end
-            
-            initfile_section = 'ScanParam';
-            
-            init_keys = inifile.GetKeys(initfile_section);
-            for ikey = 1:length( init_keys )
-                this.scanparam.(init_keys{ikey}) = inifile.GetValues(initfile_section, init_keys{ikey});
-            end
-            
-            if isfield(this.scanparam,'bvalue')
-                % convert from s / mm^2 to s / m^2
-                this.scanparam.bvalue_spm2 = this.scanparam.bvalue .* 1e6;
-                this.scanparam = rmfield(this.scanparam, 'bvalue');
-            end
-            
-            % this needs to be adjusted for higher dimensional data
-            data_dimensions = {'x', this.scanparam.dynSeries };
-            
-            % set data
-            this.set_data( data.fids, data_dimensions )
-            
-            % set phase
-            this.flags.phase_corrected = 1;
-            
-            clear data data_dimensions
-            
         case {'.rda'} % Siemens raw data
             
-            error(['Raw data file type (' file_ext ') not yet supported! (' this.scanparam.filename ')'])
+            error('ALFONSO:read_data:UnsupportedFileType', ...
+                'Raw data file type "%s" not yet supported (%s).', file_ext, this.scanparam.filename)
+        
+        case {'.mat'} % ImDataParams
+            
+            [ data, meta ] = read_ImDataParams( [this.scanparam.filepathname this.scanparam.filename]  );
+            
+            % init scanparam
+            this.init_scanparam()
+            
+            metafields = fieldnames(meta);
+            for iField = 1:length(metafields)
+                this.scanparam.(metafields{iField}) = meta.(metafields{iField});
+            end
+            
+            % set data
+            this.set_data( data, meta.dimensions )
+            
+            clear data meta
             
         otherwise
             
@@ -314,7 +299,8 @@ else
 
                 clear data data_dimensions
             else
-                error(['Unkown file type: ' file_ext ' (' this.scanparam.filename ')'])
+                error('ALFONSO:read_data:UnknownFileType', ...
+                    'Unknown file type "%s" (%s).', file_ext, this.scanparam.filename)
             end
             
     end
@@ -359,5 +345,3 @@ this.flags.read_data = 1;
     end
 
 end
-
- 

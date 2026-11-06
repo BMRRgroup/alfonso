@@ -46,18 +46,23 @@ if this.reconparam.frequency_offset_correction.enable && ~this.flags.frequency_o
     
     if DEBUG
         figure;
+        subplot(1,3,1)
         hold all
         title('Frequency offset correction: estimated shifts')
         plot(output.shifts.*size(spec,1))
         xlabel('profile #')
         ylabel('profile shift against reference')
         
-        figure;
+        subplot(1,3,2)
         hold all
-        title('Frequency offset correction: estimated shifts')
-        plot(abs(ALFONSO.ifft(fidSignalArray .* output.corr_func)))
+        title('Frequency offset correction: Original spectra')
+        plot(abs(ALFONSO.ifft(fidSignalArray )))
         %xlabel('profile #')
         %ylabel('profile shift against reference')
+        
+        subplot(1,3,3)
+        plot(abs(ALFONSO.ifft(fidSignalArray .* output.corr_func)))
+        title('Frequency offset correction: Corrected absolute spectra')
     end
     
     % apply correction
@@ -73,7 +78,8 @@ if this.reconparam.frequency_offset_correction.enable && ~this.flags.frequency_o
     
     this.flags.frequency_offset_correction = 1;
 else
-    warning('Skipped ALFONSO.frequency_offset_correction.')
+    warning('ALFONSO:frequency_offset_correction:Skipped', ...
+        'Frequency offset correction was skipped because it is already applied or disabled.')
 end
 
     function output = get_profile_shifts( spec )

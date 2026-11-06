@@ -9,7 +9,10 @@ function set_file( this, filename )
 % Created:	September 26, 2018
 %
 % Revisions: 	1.0 (Sep 26, 2018)
-%				Initial version.
+%				        Initial version.
+%             1.1 (Dec 7, 2022)
+%               Updated logic to allow reading from .mat files which do not
+%               contain ALFONSO objects.
 %
 % Authors:
 %
@@ -29,11 +32,20 @@ function set_file( this, filename )
 
 [PATHSTR, NAME, EXT] = fileparts( filename );
 
-if strcmpi(EXT, '.mat') % assume that .mat including saved ALFONSOobj was passed
-    this.load_obj(filename);
+if strcmpi(EXT, '.mat')
+    is_ALFONSOobj_file = any(strcmp(fieldnames(matfile(filename,'Writable',false)),'ALFONSOobj'));
+    if is_ALFONSOobj_file % check if .mat includes ALFONSOobj
+        this.load_obj(filename);
+    else
+        set_scanparam();
+    end
 else
-    this.scanparam.filepathname = [PATHSTR filesep];
-    this.scanparam.filename = [NAME EXT];
+    set_scanparam();
 end
+
+    function set_scanparam()
+        this.scanparam.filepathname = [PATHSTR filesep];
+        this.scanparam.filename = [NAME EXT];
+    end
 
 end

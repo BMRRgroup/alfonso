@@ -22,9 +22,9 @@ classdef ALFONSO < matlab.mixin.Copyable & dynamicprops
         
         function this = ALFONSO( filename )
             
-            this.version = '0.1.1';
+            this.version = '0.2.0';
             
-            this.gitinfo = get_gitinfo(mfilename('fullpath'));
+            this.gitinfo = get_git_info(mfilename('fullpath'));
 
             %% parameter initialization 
             % scanparam
@@ -147,10 +147,14 @@ classdef ALFONSO < matlab.mixin.Copyable & dynamicprops
             this.quantparam.optimset.MaxIter = 400;
             this.quantparam.optimset.TolX = 1e-8;
             this.quantparam.receiver_correction.enable = 0;
+            this.quantparam.bandpassfilter.enable = 0;
+            this.quantparam.bandpassfilter.param.freq_band_ppm = [-1 7];
+            this.quantparam.output.parameter_maps = 0;
             
             %% initialize flags
             this.flags.apodization = 0;
             this.flags.averaging = 0;
+            this.flags.bandpassfilter = 0;
             this.flags.coilcombination = 0;
             %this.flags.eddycurrent_phase_corrected = 0;
             this.flags.frequency_offset_correction = 0;
@@ -204,6 +208,7 @@ classdef ALFONSO < matlab.mixin.Copyable & dynamicprops
         [ fh ] = plot_fid(this)
         [ fh ] = plot_dynSeries(this, type, fig_limit )
         [ fh ] = plot_dyn(this, dyn, type )
+        [ fh ] = plot_flat(this, type )
         
         % helper methods
         freq_Hz = ppm2hertz( this, ppm )
@@ -215,6 +220,7 @@ classdef ALFONSO < matlab.mixin.Copyable & dynamicprops
         [ idd ] = is_data_dim( this, dim_name )
         [ isp, found_parname ] = is_scanparam( this, param_name );
         [ param_unit, param_factor ] = get_dim_display_info( this, scanparam )
+        [ param_values ] = reduce_dim( this, dim, idx );
 
         % data obj helper methods
         [ fname, ALFONSOobj ] = save_obj( this, filename, dest )
@@ -236,6 +242,7 @@ classdef ALFONSO < matlab.mixin.Copyable & dynamicprops
         [data, dims] = generate_signal( this, x_in );
         [ SNR ] = get_SNR( this, threshhold );
         [ noisy_data, noise ] = add_noise(this, SNR );
+        [ fid ] = bandpassfilter( this, fid, freq_band_ppm )
         
         % quantification plotting methods
         [ fh ] = plot_fit_model( this, type, fig_limit );
@@ -250,7 +257,7 @@ classdef ALFONSO < matlab.mixin.Copyable & dynamicprops
     methods(Static)
         
         % declaration of function signatures
-        [ data ]    = apodize( data, param )
+        [ data, filter ]    = apodize( data, param )
         [ weightingArray, ...
             coil_weights ] ...
                     = complexweighting( inputArray )

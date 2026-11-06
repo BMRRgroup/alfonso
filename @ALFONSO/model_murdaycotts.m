@@ -93,7 +93,8 @@ mcw = exp( prefactor .* sumval );
             filecontents = load(fullfile( fileparts(which(mfilename)), ['J0_roots_e' num2str(maxvalexp) '.mat'] ),'J0_roots');
             J0_roots = filecontents.J0_roots;
         catch
-            warning(['Could not load J0_roots_e' num2str(maxvalexp) '.mat. Calculate roots now ...'] );
+            warning('ALFONSO:model_murdaycotts:RootsNotFound', ...
+                'Could not load J0_roots_e%d.mat. Calculating roots now...', maxvalexp);
             maxval = 10^maxvalexp;
             
 %             the following expression is equivalent to

@@ -95,7 +95,8 @@ if this.reconparam.averaging.enable && ~this.flags.averaging
     this.flags.averaging = 1;
     
 else
-    warning('Skipped ALFONSO.averaging.')
+    warning('ALFONSO:averaging:Skipped', ...
+        'Averaging was skipped because it is already applied or disabled.')
 end
 
 %% nested functions

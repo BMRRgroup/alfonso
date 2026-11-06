@@ -108,6 +108,7 @@ if this.flags.fitParam2Freq
     %plot( this.quant{this.cur_quant}.fitParam2Freq.param_freq  .* 1000);
     %plot(data(:,1)./maxn(data(:,1)).*maxn(this.quant{this.cur_quant}.fitParam2Freq.param_freq  .* 1000))
 else
-    error('Run fitParam2Freq first!')
+    error('ALFONSO:plot_fit_param2freq:NotFitted', ...
+        'fitParam2Freq has not been run. Call fit_param2freq() before plotting.')
 end
 end

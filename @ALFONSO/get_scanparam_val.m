@@ -36,7 +36,8 @@ function val = get_scanparam_val( this, param_name, idx )
 [is_scanparam, found_parname] = this.is_scanparam( param_name );
 
 if ~is_scanparam
-    error(['Could not find ' param_name ' in scan parameters.'])
+    error('ALFONSO:get_scanparam_val:NotFound', ...
+        'Scan parameter "%s" not found.', param_name)
 end
 
 if nargin > 2

@@ -40,7 +40,7 @@ hold all
 plot(real(fid));
 plot(imag(fid));
 plot(abs(fid));
-if this.reconparam.apodize.enable
+if this.reconparam.apodization.enable
     plot(this.reconparam.apodization.applied_filter, 'r', 'LineWidth', 2);
 end
 legend('real', 'imag', 'abs', 'apodization');
@@ -55,9 +55,9 @@ xlim([0 size(fid,1)]);
 subplot(1,3,3);
 hold all
 title('Spectrum');
-h{1} = plot(this.scanparam.ppm_abs, real(spec), 'r');
-h{2} = plot(this.scanparam.ppm_abs, imag(spec), 'b');
-h{3} = plot(this.scanparam.ppm_abs, abs(spec), 'k');
+h{1} = plot(this.scanparam.ppm_rel, real(spec), 'r');
+h{2} = plot(this.scanparam.ppm_rel, imag(spec), 'b');
+h{3} = plot(this.scanparam.ppm_rel, abs(spec), 'k');
 legend([h{1}(1) h{2}(1) h{3}(1)], 'real', 'imag', 'abs');
 ylabel('signal (a.u.)')
 xlabel('ppm')

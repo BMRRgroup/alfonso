@@ -26,6 +26,7 @@ function [modelfunc, parfunc] = get_model_func( this )
 %           parfunc.d
 %           parfunc.g
 %           parfunc.phi
+%           parfunc.fm
 %           parfunc.T1
 %           parfunc.T2
 %           parfunc.D
@@ -53,6 +54,11 @@ function [modelfunc, parfunc] = get_model_func( this )
 %               0.4 (Jul 14, 2021)
 %                   Bugfixed omega definition to allow for both, clockwise
 %                   and counter clockwise spin definition. 
+%               0.5 (Aug 27, 2022)
+%                   Added lambda function support for omega_ref
+%               0.6 (Oct 08, 2022)
+%                   Added fieldmap (fm) modulation function
+%                   Added factor 2*pi to chemical shift and fieldmap modulation
 %
 % Authors:
 %
@@ -111,47 +117,70 @@ if ~ isempty( this.quant )
     
     %% PARfunc - parameter functions
     % generate parameter functions PARfunc
+    % NOTE: The use of eval() here is intentional for flexibility in defining
+    % custom constraint functions and parameter references in model definitions.
+    % This allows users to define complex parameter relationships in JSON model
+    % files that are dynamically loaded and processed. While eval() can pose 
+    % security risks in some contexts, in this research-oriented code it enables
+    % the flexible model definition system that is central to ALFONSO's purpose.
     for i = 1:length( paramlist )
         cur_par = [paramlist{i} '_vars'];
         cur_par_constraint = [paramlist{i} '_constraint'];
+        cur_par_ref = [paramlist{i} '_ref'];
         if this.is_model_param( cur_par_constraint )
             % load constraint function if defined
             % eval: PAR_func = eval(modelparam.PAR_constraint);
-            eval([paramlist{i} '_func = eval(modelparam.' cur_par_constraint ');']);
+            if nargin(eval(modelparam.(cur_par_constraint))) > 1
+                eval([paramlist{i} '_func = ' modelparam.(cur_par_constraint) ';']);
+            else % backwards compatibility, in case only x as single argument was defined in the constraint function
+                tmp_constraint_func = eval(modelparam.(cur_par_constraint));
+                eval([paramlist{i} '_func = @(x,c) tmp_constraint_func(x);']);
+            end
         elseif this.is_model_param( cur_par )
             % otherwise load parameter variables directly
-            % eval: PAR_func = @(x) x(modelparam.PAR_vars);
-            eval([paramlist{i} '_func = @(x) x(modelparam.' cur_par ');']);
+            % eval: PAR_func = @(x,c) x(modelparam.PAR_vars);
+            eval([paramlist{i} '_func = @(x,c) x(modelparam.' cur_par ');']);
+        elseif this.is_model_param( cur_par_ref )
+            % otherwise load parameter variables directly
+            % eval: PAR_func = eval(modelparam.PAR_ref);
+            eval([paramlist{i} '_func = eval(modelparam.' cur_par_ref ');']);
         end
     end
     
     % omega function handling
     % make us of omega_ref if existing
     % use freq_sign here
-    if exist('omega_func','var')
+    if exist('omega_func','var') && isfield(modelparam, 'omega_vars') && ~isempty(modelparam.omega_vars)
         if this.is_model_param('omega_ref')
-            omega_func = @(x) omega_func(x) + modelparam.omega_ref;
+            if ischar(modelparam.omega_ref)
+                omega_func = @(x,c) ensure_row(omega_func(x,c)) + ensure_row(eval(modelparam.omega_ref));
+            else
+                omega_func = @(x,c) omega_func(x,c) + modelparam.omega_ref;
+            end
         end
-        omega_func = @(x) this.ppm2hertz( omega_func(x) - this.scanparam.acq_window_center_ppm ) * (-this.scanparam.freqsign);
+        omega_func = @(x,c) 2.* pi .* this.ppm2hertz( omega_func(x,c) - this.scanparam.acq_window_center_ppm ) * (-this.scanparam.freqsign);
+    else
+        omega_func = @(x,c) 2.* pi .* this.ppm2hertz( ensure_row(eval(modelparam.omega_ref)) - this.scanparam.acq_window_center_ppm ) * (-this.scanparam.freqsign);
     end
     
     
     %% Upsilon - chemical species relaxation function
     % rho, omega, d, g, phi
-    Upsilon_func = @(x) 1;
-    Upsilon_pars = {'rho', 'omega', 'd', 'g', 'phi'};
+    Upsilon_func = @(x,c) 1;
+    Upsilon_pars = {'rho', 'omega', 'd', 'g', 'phi', 'fm'};
     
     rhomod = @(rho) ensure_row(rho);
     omegamod = @(omega) exp(1j .* ensure_row(omega) * t);
-    dmod = @(d) exp(- t .* ensure_row(d));
-    gmod = @(g) exp(- t.^2 .* ensure_row(g).^2 .* 0.5);
+    dmod = @(d) exp(- t .* ensure_row(d) * 2 * pi);
+    gmod = @(g) exp(- t.^2 .* ensure_row(g).^2 .* 0.5 * (2*pi)^2);
     phimod = @(phi) exp(1j .* ensure_row(phi));
+    fmmod = @(fm) exp(2j .* pi .* ensure_row(fm) * t);
     
     for i = 1:length( Upsilon_pars )
         cur_par = Upsilon_pars{i};
-        if this.is_model_param( [ cur_par  '_vars'] )
-            % eval: Upsilon_func =  @(x) Upsilon_func(x) .* PARmod(PAR_func(x));
-            eval(['Upsilon_func = @(x) Upsilon_func(x) .* ' cur_par 'mod(' cur_par '_func(x));']);
+        if this.is_model_param( [ cur_par  '_vars'] ) || this.is_model_param( [ cur_par  '_ref'] ) %strcmp(cur_par, 'omega')
+            % eval: Upsilon_func =  @(x,c) Upsilon_func(x,c) .* PARmod(PAR_func(x,c));
+            eval(['Upsilon_func = @(x,c) Upsilon_func(x,c) .* ' cur_par 'mod(' cur_par '_func(x,c));']);
         end
     end
     
@@ -166,7 +195,7 @@ if ~ isempty( this.quant )
     %   6: bvalue series
     %   7: aver (averages)
     
-    Theta_func = @(x) 1;
+    Theta_func = @(x,c) 1;
     
     % corresponding signal modulation functions for seq_pars
     seq_func = {...
@@ -208,16 +237,16 @@ if ~ isempty( this.quant )
             % extract arguments from SEQPAR_func handle
             dep_par_fh = functions(eval([seq_pars{i} '_func']));
             dep_pars = split(extractBetween(dep_par_fh.function,"@(",")"),',');
-            % eval: Thetafunc =  @(x) Thetafunc(x) .* SEQPAR_func(x));
-            eval(['Theta_func = @(x) Theta_func(x) .* ' seq_pars{i} '_func(' ALFONSO.var2fstr(dep_pars,'%s_func(x)',',') ');']);
+            % eval: Thetafunc =  @(x,c) Thetafunc(x,c) .* SEQPAR_func(x));
+            eval(['Theta_func = @(x,c) Theta_func(x,c) .* ' seq_pars{i} '_func(' ALFONSO.var2fstr(dep_pars,'%s_func(x,c)',',') ');']);
         end
     end
     
     %% final assembly of modelfunc
-    % modelfunc = @(x) Upsilon_func(x) .* Theta_func(x);
+    % modelfunc = @(x,c) Upsilon_func(x,c) .* Theta_func(x,c);
     % nl2sol workaround: ensure x are col vectors to ensure correct
     % handling of dimensions
-    modelfunc = @(x) Upsilon_func(ensure_col(x)) .* Theta_func(ensure_col(x));
+    modelfunc = @(x,c) Upsilon_func(ensure_col(x),c) .* Theta_func(ensure_col(x),c);
     
     % return parameter functions if requested
     if nargout > 1
@@ -230,7 +259,8 @@ if ~ isempty( this.quant )
     end
     
 else
-    error('Model definition missing. Please load model first using ALFONSO.set_model() !')
+    error('ALFONSO:get_model_func:ModelNotLoaded', ...
+        'Model definition missing. Please load model first using ALFONSO.set_model().')
 end
 
 end
